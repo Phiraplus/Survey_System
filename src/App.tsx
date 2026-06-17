@@ -89,39 +89,33 @@ function App() {
 
       {/* Main Header */}
       <header className="header">
-        <div className="container header-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="container header-container">
           
           {/* Logo and Header title */}
           {(showLogo || showHeaderTitle) && (
-            <div className="logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => { window.location.href = '/'; }}>
+            <div className="logo logo-container" onClick={() => { window.location.href = '/'; }}>
               {showLogo && <span>{logoEmoji}</span>}
               {showLogo && <span style={{ fontWeight: 800 }}>{logoText}</span>}
-              {showLogo && showHeaderTitle && <span style={{ opacity: 0.3, margin: '0 4px' }}>|</span>}
+              {showLogo && showHeaderTitle && <span className="logo-title-divider">|</span>}
               {showHeaderTitle && (
-                <span style={{ 
-                  fontSize: '13px', 
-                  fontWeight: 'normal', 
-                  color: 'var(--text-secondary)',
-                  opacity: 0.8
-                }}>
+                <span className="header-subtitle">
                   {headerTitle}
                 </span>
               )}
             </div>
           )}
 
-          <nav className="nav-links" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <nav className="nav-links">
             
             {/* If admin is logged in, show logout button and admin credentials */}
             {isAdmin && user && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+              <div className="admin-user-info">
+                <span className="admin-user-email">
                   👤 {user.email}
                 </span>
                 <button 
-                  className="btn btn-sm btn-ghost" 
+                  className="btn btn-sm btn-ghost admin-logout-btn" 
                   onClick={logout}
-                  style={{ padding: '6px 12px', fontSize: '12px' }}
                 >
                   Logout
                 </button>
@@ -130,44 +124,20 @@ function App() {
 
             {/* Language Selector Dropdown (Hidden if only 1 language allowed) */}
             {allowedLanguages.length > 1 && (
-              <div style={{ position: 'relative' }}>
+              <div className="lang-selector-wrapper">
                 <button 
-                  className="nav-btn" 
+                  className="nav-btn lang-toggle-btn" 
                   onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                   🌐 {languageNames[currentLang]?.name || 'English'}
                 </button>
                 {langDropdownOpen && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    backgroundColor: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-md)',
-                    boxShadow: 'var(--shadow-lg)',
-                    zIndex: 200,
-                    marginTop: '8px',
-                    minWidth: '150px',
-                    overflow: 'hidden'
-                  }}>
+                  <div className="lang-dropdown-menu">
                     {allowedLanguages.map(lang => (
                       <button
                         key={lang}
                         onClick={() => handleLanguageChange(lang)}
-                        style={{
-                          display: 'block',
-                          width: '100%',
-                          padding: '10px 16px',
-                          textAlign: 'left',
-                          background: currentLang === lang ? 'var(--bg-tertiary)' : 'transparent',
-                          color: 'var(--text-primary)',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: '13px',
-                          fontWeight: currentLang === lang ? 'bold' : 'normal'
-                        }}
+                        className={`lang-dropdown-item ${currentLang === lang ? 'active' : ''}`}
                       >
                         {languageNames[lang].nativeName}
                       </button>

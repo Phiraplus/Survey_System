@@ -537,25 +537,22 @@ export function SurveyManager() {
         )}
       </div>
 
-      <div className="card" style={{ padding: 'var(--space-1)', marginBottom: 'var(--space-2)', display: 'inline-flex', gap: '4px', background: 'var(--bg-tertiary)' }}>
+      <div className="admin-tab-container nested-tabs">
         <button
           onClick={() => setActiveSubTab('rating')}
-          className={`btn ${activeSubTab === 'rating' ? 'btn-secondary' : 'btn-ghost'}`}
-          style={{ padding: '6px 16px', fontSize: '12px' }}
+          className={`btn ${activeSubTab === 'rating' ? 'btn-secondary' : 'btn-ghost'} admin-tab-btn`}
         >
           ⭐️ Rating Questions
         </button>
         <button
           onClick={() => setActiveSubTab('text')}
-          className={`btn ${activeSubTab === 'text' ? 'btn-secondary' : 'btn-ghost'}`}
-          style={{ padding: '6px 16px', fontSize: '12px' }}
+          className={`btn ${activeSubTab === 'text' ? 'btn-secondary' : 'btn-ghost'} admin-tab-btn`}
         >
           📝 Qualitative Text Fields
         </button>
         <button
           onClick={() => setActiveSubTab('settings')}
-          className={`btn ${activeSubTab === 'settings' ? 'btn-secondary' : 'btn-ghost'}`}
-          style={{ padding: '6px 16px', fontSize: '12px' }}
+          className={`btn ${activeSubTab === 'settings' ? 'btn-secondary' : 'btn-ghost'} admin-tab-btn`}
         >
           ⚙️ System Settings
         </button>
@@ -567,7 +564,7 @@ export function SurveyManager() {
             ⚙️ Header & Language Settings
           </h4>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
+          <div className="settings-form-grid">
             
             {/* Logo Settings */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
@@ -649,7 +646,7 @@ export function SurveyManager() {
                 Select languages allowed for users to switch in the header dropdown:
               </p>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', padding: '12px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-tertiary)' }}>
+              <div className="allowed-langs-list">
                 {supportedLanguages.map(lang => {
                   const isChecked = selectedLanguages.includes(lang);
                   return (
@@ -741,8 +738,8 @@ export function SurveyManager() {
         title={editingItem ? `Edit Question: ${editingItem.id}` : 'Add New Question'}
         size="wide"
       >
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+        <form onSubmit={handleSave} className="modal-question-form">
+          <div className="modal-form-grid">
             <div className="form-group">
               <label className="form-label">Group / Category</label>
               <input 

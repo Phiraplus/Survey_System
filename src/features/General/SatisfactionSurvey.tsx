@@ -495,19 +495,19 @@ export function SatisfactionSurvey({ isPublic = false }: SatisfactionSurveyProps
           {groupOrder.map(group => {
             const groupQuestions = questions.filter(q => q.group === group);
             return (
-              <div key={group} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-                <h5 style={{ fontSize: 'var(--text-xs)', fontWeight: 800, color: 'var(--color-maroon-700)', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '2px solid var(--color-gold-500)', paddingBottom: '4px', margin: 0 }}>{t(`custom.survey.groups.${group}`, group)}</h5>
+              <div key={group} className="survey-review-group">
+                <h5 className="survey-review-group-title">{t(`custom.survey.groups.${group}`, group)}</h5>
                 {groupQuestions.map(cat => {
                   const ratingVal = existingSurvey.ratings[cat.id] || 0;
                   const pct = ratingVal * 20;
                   return (
-                    <div key={cat.id}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
-                        <span style={{ display: 'inline-flex', gap: '8px' }}>
+                    <div key={cat.id} className="survey-review-item">
+                      <div className="survey-review-row">
+                        <span className="survey-review-label">
                           <span>{cat.emoji}</span>
                           <span>{cat.label[lang] || cat.label.en}</span>
                         </span>
-                        <span style={{ color: 'var(--color-gold-600)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <span className="survey-review-rating">
                           {renderStars(ratingVal)} ({ratingVal.toFixed(1)})
                         </span>
                       </div>
@@ -521,7 +521,7 @@ export function SatisfactionSurvey({ isPublic = false }: SatisfactionSurveyProps
             );
           })}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-4)', marginTop: 'var(--space-2)' }}>
+          <div className="survey-text-grid review-grid">
             {textQuestions.map(q => {
               const ans = getTextAnswer(existingSurvey, q.id);
               const isDashed = q.id === 'suggestions';
@@ -591,22 +591,22 @@ export function SatisfactionSurvey({ isPublic = false }: SatisfactionSurveyProps
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
+        <div className="survey-groups-container">
           {groupOrder.map(group => {
             const groupQuestions = questions.filter(q => q.group === group);
             return (
-              <section key={group}>
-                <h5 style={{ fontSize: 'var(--text-sm)', fontWeight: 800, color: 'var(--color-primary-800)', borderBottom: '2px solid var(--color-gold-500)', paddingBottom: 'var(--space-2)', marginBottom: 'var(--space-4)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t(`custom.survey.groups.${group}`, group)}</h5>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+              <section key={group} className="survey-group-section">
+                <h5 className="survey-group-title">{t(`custom.survey.groups.${group}`, group)}</h5>
+                <div className="survey-questions-list">
                   {groupQuestions.map(cat => {
                     const activeStarCount = hoveredRatings[cat.id] || ratings[cat.id] || 0;
                     return (
-                      <div key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-3) 0', borderBottom: '1px solid var(--border-color)', gap: 'var(--space-4)' }}>
-                        <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                      <div key={cat.id} className="survey-question-row">
+                        <span className="survey-question-label">
                           <span style={{ marginRight: '8px' }}>{cat.emoji}</span>
                           {cat.label[lang] || cat.label.en}
                         </span>
-                        <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                        <div className="survey-question-stars">
                           {[1, 2, 3, 4, 5].map(star => (
                             <button
                               key={star}
@@ -614,14 +614,9 @@ export function SatisfactionSurvey({ isPublic = false }: SatisfactionSurveyProps
                               onClick={() => handleStarClick(cat.id, star)}
                               onMouseEnter={() => handleStarMouseEnter(cat.id, star)}
                               onMouseLeave={() => handleStarMouseLeave(cat.id)}
+                              className="survey-star-btn"
                               style={{ 
-                                background: 'none', 
-                                border: 'none', 
-                                padding: '4px', 
-                                cursor: 'pointer', 
-                                fontSize: '1.75rem', 
                                 color: star <= activeStarCount ? 'var(--color-gold-500)' : 'rgba(192, 192, 192, 0.4)', 
-                                transition: 'all 0.2s ease',
                                 transform: star <= activeStarCount ? 'scale(1.1)' : 'scale(1)'
                               }}
                             >
@@ -639,11 +634,11 @@ export function SatisfactionSurvey({ isPublic = false }: SatisfactionSurveyProps
         </div>
 
         {/* Suggestions & Comments Section */}
-        <section style={{ borderTop: '2px solid var(--border-color)', paddingTop: 'var(--space-6)' }}>
-          <h5 style={{ fontSize: 'var(--text-sm)', fontWeight: 800, color: 'var(--color-primary-800)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 'var(--space-4)' }}>
+        <section className="survey-additional-section">
+          <h5 className="survey-additional-title">
             📝 {t('custom.survey.additionalSection', 'Additional Suggestions and Comments')}
           </h5>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-6)' }}>
+          <div className="survey-text-grid">
             {textQuestions.map(q => (
               <div key={q.id} className="form-group">
                 <label className="form-label" style={{ fontWeight: 700 }}>
@@ -662,23 +657,14 @@ export function SatisfactionSurvey({ isPublic = false }: SatisfactionSurveyProps
           </div>
         </section>
 
-        <div style={{ display: 'flex', gap: 'var(--space-3)', marginTop: 'var(--space-4)' }}>
+        <div className="survey-form-actions">
           {isEditing && (
-            <button type="button" className="btn btn-secondary" style={{ flex: 1, height: '48px', fontWeight: 700 }} onClick={() => setIsEditing(false)}>Cancel</button>
+            <button type="button" className="btn btn-secondary survey-action-btn btn-cancel" onClick={() => setIsEditing(false)}>Cancel</button>
           )}
           <button 
             type="submit" 
-            className="btn btn-primary" 
+            className="btn btn-primary survey-action-btn btn-submit" 
             disabled={submitting} 
-            style={{ 
-              flex: 2, 
-              height: '48px', 
-              fontWeight: 800, 
-              color: 'var(--color-primary-900)',
-              border: 'none',
-              boxShadow: 'var(--shadow-lg), 0 4px 15px rgba(197, 165, 90, 0.3)',
-              letterSpacing: '0.025em'
-            }}
           >
             {submitting ? t('common.loading') : (isEditing ? t('custom.survey.updateButton', 'Update Evaluation') : t('custom.survey.submitButton', 'Submit Evaluation'))}
           </button>

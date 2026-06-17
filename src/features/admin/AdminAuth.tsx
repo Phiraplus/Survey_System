@@ -66,74 +66,26 @@ export function AdminAuth() {
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '65vh',
-      padding: 'var(--space-4)'
-    }}>
-      <div className="card" style={{
-        width: '100%',
-        maxWidth: '460px',
-        padding: 'var(--space-8)',
-        background: 'rgba(255, 255, 255, 0.03)',
-        backdropFilter: 'blur(16px) saturate(120%)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '24px',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.35)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--space-6)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
+    <div className="admin-auth-container">
+      <div className="card admin-auth-card">
         {/* Sleek top glowing border line */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: 'linear-gradient(90deg, var(--color-gold-500), var(--color-primary-800))'
-        }} />
+        <div className="admin-auth-top-line" />
 
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ 
-            fontSize: '3rem', 
-            marginBottom: 'var(--space-2)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '70px',
-            height: '70px',
-            background: 'rgba(212, 175, 55, 0.08)',
-            border: '1px solid rgba(212, 175, 55, 0.2)',
-            borderRadius: '50%'
-          }}>
+        <div className="admin-auth-header">
+          <div className="admin-auth-icon-box">
             🔒
           </div>
-          <h2 style={{ 
-            fontFamily: 'var(--font-heading)', 
-            fontWeight: 800, 
-            fontSize: 'var(--text-2xl)',
-            color: 'var(--color-primary-800)', 
-            margin: '8px 0 0 0' 
-          }}>
+          <h2 className="admin-auth-title">
             {isRegisterMode ? 'Register Admin Account' : 'Admin Portal Access'}
           </h2>
-          <p style={{ 
-            color: 'var(--text-secondary)', 
-            fontSize: 'var(--text-xs)', 
-            marginTop: '6px' 
-          }}>
+          <p className="admin-auth-subtitle">
             {isRegisterMode ? 'Create credentials to manage the survey system.' : 'Please authenticate to access configuration and reports.'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+        <form onSubmit={handleSubmit} className="admin-auth-form">
           {isRegisterMode && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)' }}>
+            <div className="admin-auth-grid">
               <div className="form-group">
                 <label className="form-label" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>First Name</label>
                 <input
@@ -219,21 +171,8 @@ export function AdminAuth() {
 
           <button
             type="submit"
-            className="btn btn-primary"
+            className="btn btn-primary admin-auth-submit-btn"
             disabled={loading}
-            style={{
-              height: '45px',
-              fontSize: '14px',
-              fontWeight: 700,
-              marginTop: 'var(--space-2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'linear-gradient(135deg, var(--color-primary-800), var(--color-primary-950))',
-              border: 'none',
-              boxShadow: 'var(--shadow-md)',
-              cursor: 'pointer'
-            }}
           >
             {loading ? (
               <span className="spinner" style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
@@ -243,13 +182,7 @@ export function AdminAuth() {
           </button>
         </form>
 
-        <div style={{
-          textAlign: 'center',
-          borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-          paddingTop: 'var(--space-4)',
-          fontSize: '12px',
-          color: 'var(--text-secondary)'
-        }}>
+        <div className="admin-auth-footer">
           {isRegisterMode ? (
             <span>
               Already have an admin account?{' '}
@@ -261,14 +194,7 @@ export function AdminAuth() {
                   setConfirmPassword('');
                   setAdminPasscode('');
                 }}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: 'var(--color-gold-600)', 
-                  fontWeight: 700, 
-                  cursor: 'pointer',
-                  padding: 0
-                }}
+                className="admin-auth-toggle-btn"
               >
                 Sign In
               </button>
@@ -283,14 +209,7 @@ export function AdminAuth() {
                   setPassword('');
                   setAdminPasscode('');
                 }}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: 'var(--color-gold-600)', 
-                  fontWeight: 700, 
-                  cursor: 'pointer',
-                  padding: 0
-                }}
+                className="admin-auth-toggle-btn"
               >
                 Create Account
               </button>

@@ -450,14 +450,14 @@ export function SurveyResults() {
           <h3 className="admin-page-title">📊 {t('admin.survey.title', 'Satisfaction Reports')}</h3>
           <p className="admin-page-subtitle">{t('admin.survey.subtitle', 'Analyze aggregate feedback and qualitative comments.')}</p>
         </div>
-        <div className="admin-page-actions" style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+        <div className="admin-page-actions">
           <button className="btn btn-secondary btn-sm" onClick={handleExportCSV} disabled={totalCount === 0}>
             📥 {t('common.export', 'Export Report')}
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-6)' }}>
+      <div className="results-metrics-grid">
         <Card style={{ padding: 'var(--space-6)' }}>
           <h4 style={{ fontSize: 'var(--text-base)', fontWeight: 800, color: 'var(--color-primary-800)', borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
             📈 Performance Metrics
@@ -467,7 +467,7 @@ export function SurveyResults() {
               const pct = cat.avg * 20;
               return (
                 <div key={cat.key}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  <div className="metrics-row">
                     <span>{cat.emoji} {cat.label}</span>
                     <span style={{ color: 'var(--color-gold-600)' }}>{cat.avg.toFixed(1)} / 5.0</span>
                   </div>
@@ -480,11 +480,11 @@ export function SurveyResults() {
           </div>
         </Card>
 
-        <Card variant="glass" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 'var(--space-4)', border: '1px solid var(--color-gold-500)', padding: 'var(--space-6)' }}>
-          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-maroon-700)', fontWeight: 700, textTransform: 'uppercase' }}>Global Score Index</span>
-          <div style={{ fontSize: '4rem', fontWeight: 900, color: 'var(--color-primary-800)' }}>{globalAverage.toFixed(2)}</div>
+        <Card className="global-score-card">
+          <span className="global-score-title">Global Score Index</span>
+          <div className="global-score-value">{globalAverage.toFixed(2)}</div>
           <div>{renderStars(globalAverage, '1.5rem')}</div>
-          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-tertiary)' }}>from {totalCount} evaluations</span>
+          <span className="global-score-count">from {totalCount} evaluations</span>
         </Card>
       </div>
 
