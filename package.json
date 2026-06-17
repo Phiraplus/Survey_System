@@ -10,6 +10,7 @@
     "seed": "node seed-survey.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
     "firebase": "^12.14.0",
     "flag-icons": "^7.5.0",
     "i18next": "^26.3.1",
