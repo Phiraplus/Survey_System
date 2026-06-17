@@ -19,12 +19,6 @@ export function PublicSurveyDashboard() {
       <div style={{ background: 'transparent' }}>
         <SatisfactionSurvey isPublic={true} />
       </div>
-
-      <div style={{ marginTop: 'var(--space-12)', textAlign: 'center', opacity: 0.5 }}>
-        <p style={{ fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 600 }}>
-          {t('custom.survey.footerNotice', 'Official Retraining Conference Satisfaction Survey')}
-        </p>
-      </div>
     </div>
   );
 }

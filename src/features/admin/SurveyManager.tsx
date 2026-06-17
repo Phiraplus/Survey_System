@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../contexts/ToastContext';
+import { useConfig } from '../../contexts/ConfigContext';
 import { surveyService } from '../../services/surveyService';
 import { supportedLanguages, languageNames } from '../../lib/i18n';
 import { Modal } from '../../components/ui';
@@ -241,12 +242,21 @@ const DEFAULT_QUESTIONS: SurveyQuestion[] = [
 export function SurveyManager() {
   const { t } = useTranslation();
   const { addToast } = useToast();
+  const { refreshConfig } = useConfig();
 
   const [questions, setQuestions] = useState<SurveyQuestion[]>([]);
   const [textQuestions, setTextQuestions] = useState<SurveyQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState<'rating' | 'text'>('rating');
+  const [activeSubTab, setActiveSubTab] = useState<'rating' | 'text' | 'settings'>('rating');
+
+  // General settings state
+  const [logoEmoji, setLogoEmoji] = useState('📝');
+  const [logoText, setLogoText] = useState('Survey System');
+  const [showLogo, setShowLogo] = useState(true);
+  const [headerTitle, setHeaderTitle] = useState('Satisfaction Evaluation');
+  const [showHeaderTitle, setShowHeaderTitle] = useState(true);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['en', 'zh', 'es', 'ar', 'ru', 'fr', 'th']);
 
   const [editingItem, setEditingItem] = useState<SurveyQuestion | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -274,6 +284,12 @@ export function SurveyManager() {
       if (config) {
         setQuestions(config.questions.sort((a, b) => a.order - b.order));
         setTextQuestions((config.textQuestions || [...DEFAULT_TEXT_QUESTIONS]).sort((a, b) => a.order - b.order));
+        setLogoEmoji(config.logoEmoji ?? '📝');
+        setLogoText(config.logoText ?? 'Survey System');
+        setShowLogo(config.showLogo !== false);
+        setHeaderTitle(config.headerTitle ?? 'Satisfaction Evaluation');
+        setShowHeaderTitle(config.showHeaderTitle !== false);
+        setSelectedLanguages(config.allowedLanguages || ['en', 'zh', 'es', 'ar', 'ru', 'fr', 'th']);
       } else {
         setQuestions([...DEFAULT_QUESTIONS]);
         setTextQuestions([...DEFAULT_TEXT_QUESTIONS]);
@@ -288,6 +304,35 @@ export function SurveyManager() {
   useEffect(() => {
     fetchConfig();
   }, [fetchConfig]);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedLanguages.length === 0) {
+      addToast({ type: 'error', title: t('common.error'), message: 'At least one language must be selected.' });
+      return;
+    }
+    setSaving(true);
+    try {
+      const config: SurveyConfig = {
+        questions,
+        textQuestions,
+        logoEmoji,
+        logoText,
+        showLogo,
+        headerTitle,
+        showHeaderTitle,
+        allowedLanguages: selectedLanguages,
+        updatedAt: new Date()
+      };
+      await surveyService.updateSurveyConfig(config);
+      await refreshConfig();
+      addToast({ type: 'success', title: t('common.success'), message: 'System settings updated' });
+    } catch {
+      addToast({ type: 'error', title: t('common.error'), message: 'Failed to update system settings' });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleEdit = (q: SurveyQuestion) => {
     setEditingItem(q);
@@ -478,16 +523,18 @@ export function SurveyManager() {
       <div className="admin-page-header" style={{ marginBottom: '16px' }}>
         <div>
           <h3 className="admin-page-title">📝 Survey Configuration</h3>
-          <p className="admin-page-subtitle">Manage the questions and categories for the Satisfaction Evaluation Survey.</p>
+          <p className="admin-page-subtitle">Manage the questions, branding, and languages for the Satisfaction Evaluation Survey.</p>
         </div>
-        <div className="admin-page-actions" style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn btn-secondary" onClick={handleRestoreDefaults} disabled={saving}>
-            🔄 Restore Defaults
-          </button>
-          <button className="btn btn-primary" onClick={handleAddNew}>
-            ➕ Add New Question
-          </button>
-        </div>
+        {activeSubTab !== 'settings' && (
+          <div className="admin-page-actions" style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn btn-secondary" onClick={handleRestoreDefaults} disabled={saving}>
+              🔄 Restore Defaults
+            </button>
+            <button className="btn btn-primary" onClick={handleAddNew}>
+              ➕ Add New Question
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="card" style={{ padding: 'var(--space-1)', marginBottom: 'var(--space-2)', display: 'inline-flex', gap: '4px', background: 'var(--bg-tertiary)' }}>
@@ -505,55 +552,188 @@ export function SurveyManager() {
         >
           📝 Qualitative Text Fields
         </button>
+        <button
+          onClick={() => setActiveSubTab('settings')}
+          className={`btn ${activeSubTab === 'settings' ? 'btn-secondary' : 'btn-ghost'}`}
+          style={{ padding: '6px 16px', fontSize: '12px' }}
+        >
+          ⚙️ System Settings
+        </button>
       </div>
 
-      <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: '16px' }}>
-        <div className="table-responsive" style={{ margin: 0 }}>
-          <table className="table" style={{ minWidth: '600px' }}>
-            <thead>
-              <tr>
-                <th style={{ width: '80px' }}>Order</th>
-                <th style={{ width: '60px' }}>Emoji</th>
-                <th style={{ width: '150px' }}>Group / Category</th>
-                <th>Question Label (EN)</th>
-                <th style={{ width: '120px' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(activeSubTab === 'rating' ? questions : textQuestions).map((q, idx) => (
-                <tr 
-                  key={q.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, idx)}
-                  onDragOver={(e) => handleDragOver(e)}
-                  onDrop={(e) => handleDrop(e, idx)}
-                  style={{ cursor: 'move', opacity: draggedIdx === idx ? 0.5 : 1 }}
-                >
-                  <td style={{ fontWeight: 800, color: 'var(--color-gold-600)' }}>
-                    <span style={{ marginRight: '8px', opacity: 0.5 }}>⠿</span>
-                    #{q.order}
-                  </td>
-                  <td style={{ fontSize: '1.2rem' }}>{q.emoji}</td>
-                  <td>
-                    <span className="badge badge-gold">{t(`custom.survey.groups.${q.group}`, q.group || 'Comments')}</span>
-                  </td>
-                  <td style={{ fontSize: '13px' }}>{q.label.en}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(q)}>
-                        ✏️
-                      </button>
-                      <button className="btn btn-sm btn-secondary" onClick={() => handleDelete(q.id)} style={{ color: 'var(--color-maroon-700)' }}>
-                        🗑️
-                      </button>
+      {activeSubTab === 'settings' ? (
+        <form onSubmit={handleSaveSettings} className="card" style={{ padding: 'var(--space-8)', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', marginTop: '16px' }}>
+          <h4 style={{ fontSize: 'var(--text-base)', fontWeight: 800, color: 'var(--color-primary-800)', borderBottom: '1px solid var(--border-color)', paddingBottom: 'var(--space-2)', margin: 0 }}>
+            ⚙️ Header & Language Settings
+          </h4>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'var(--space-6)' }}>
+            
+            {/* Logo Settings */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <h5 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--color-primary-800)' }}>Logo Customization</h5>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="checkbox" 
+                  id="showLogo" 
+                  checked={showLogo} 
+                  onChange={e => setShowLogo(e.target.checked)} 
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <label htmlFor="showLogo" style={{ fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Show Logo in Headerbar</label>
+              </div>
+
+              {showLogo && (
+                <>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px' }}>Logo Emoji Icon</label>
+                    <input 
+                      className="form-input" 
+                      value={logoEmoji} 
+                      onChange={e => setLogoEmoji(e.target.value)} 
+                      placeholder="e.g. 📝" 
+                      required
+                      style={{ fontSize: '14px', height: '38px' }}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label" style={{ fontSize: '12px' }}>Logo Text / Brand Name</label>
+                    <input 
+                      className="form-input" 
+                      value={logoText} 
+                      onChange={e => setLogoText(e.target.value)} 
+                      placeholder="e.g. Survey System" 
+                      required
+                      style={{ fontSize: '14px', height: '38px' }}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Header Headline settings */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <h5 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--color-primary-800)' }}>Headline Customization</h5>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="checkbox" 
+                  id="showHeaderTitle" 
+                  checked={showHeaderTitle} 
+                  onChange={e => setShowHeaderTitle(e.target.checked)} 
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <label htmlFor="showHeaderTitle" style={{ fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Show Headline in Headerbar</label>
+              </div>
+
+              {showHeaderTitle && (
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '12px' }}>Header Headline / Title</label>
+                  <input 
+                    className="form-input" 
+                    value={headerTitle} 
+                    onChange={e => setHeaderTitle(e.target.value)} 
+                    placeholder="e.g. Satisfaction Evaluation" 
+                    required
+                    style={{ fontSize: '14px', height: '38px' }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Language Settings */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <h5 style={{ fontSize: '14px', fontWeight: 700, margin: 0, color: 'var(--color-primary-800)' }}>Allowed Languages</h5>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>
+                Select languages allowed for users to switch in the header dropdown:
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', padding: '12px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-tertiary)' }}>
+                {supportedLanguages.map(lang => {
+                  const isChecked = selectedLanguages.includes(lang);
+                  return (
+                    <div key={lang} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input 
+                        type="checkbox" 
+                        id={`lang-${lang}`}
+                        checked={isChecked}
+                        onChange={e => {
+                          if (e.target.checked) {
+                            setSelectedLanguages(prev => [...prev, lang]);
+                          } else {
+                            setSelectedLanguages(prev => prev.filter(l => l !== lang));
+                          }
+                        }}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      />
+                      <label htmlFor={`lang-${lang}`} style={{ fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>{languageNames[lang].nativeName}</span>
+                        <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>({languageNames[lang].name})</span>
+                      </label>
                     </div>
-                  </td>
+                  );
+                })}
+              </div>
+            </div>
+            
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border-color)', paddingTop: 'var(--space-4)', marginTop: 'var(--space-2)' }}>
+            <button type="submit" className="btn btn-primary" disabled={saving} style={{ minWidth: '150px' }}>
+              {saving ? 'Saving...' : '💾 Save Settings'}
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: '16px' }}>
+          <div className="table-responsive" style={{ margin: 0 }}>
+            <table className="table" style={{ minWidth: '600px' }}>
+              <thead>
+                <tr>
+                  <th style={{ width: '80px' }}>Order</th>
+                  <th style={{ width: '60px' }}>Emoji</th>
+                  <th style={{ width: '150px' }}>Group / Category</th>
+                  <th>Question Label (EN)</th>
+                  <th style={{ width: '120px' }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(activeSubTab === 'rating' ? questions : textQuestions).map((q, idx) => (
+                  <tr 
+                    key={q.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, idx)}
+                    onDragOver={(e) => handleDragOver(e)}
+                    onDrop={(e) => handleDrop(e, idx)}
+                    style={{ cursor: 'move', opacity: draggedIdx === idx ? 0.5 : 1 }}
+                  >
+                    <td style={{ fontWeight: 800, color: 'var(--color-gold-600)' }}>
+                      <span style={{ marginRight: '8px', opacity: 0.5 }}>⠿</span>
+                      #{q.order}
+                    </td>
+                    <td style={{ fontSize: '1.2rem' }}>{q.emoji}</td>
+                    <td>
+                      <span className="badge badge-gold">{t(`custom.survey.groups.${q.group}`, q.group || 'Comments')}</span>
+                    </td>
+                    <td style={{ fontSize: '13px' }}>{q.label.en}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn btn-sm btn-secondary" onClick={() => handleEdit(q)}>
+                          ✏️
+                        </button>
+                        <button className="btn btn-sm btn-secondary" onClick={() => handleDelete(q.id)} style={{ color: 'var(--color-maroon-700)' }}>
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       <Modal
         isOpen={modalOpen}

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useMemo, useCallback, t
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   type User,
 } from 'firebase/auth';
@@ -17,6 +18,7 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  register: (email: string, password: string, firstName: string, lastName: string, role: UserRole) => Promise<void>;
   enableDemoMode: (role: UserRole) => void;
   disableDemoMode: () => void;
   isDemoMode: boolean;
@@ -85,14 +87,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    if (isDemoMode) {
-      throw new Error('Please disable Demo Mode first to log in with actual Firebase Auth.');
-    }
-    if (!auth) {
-      throw new Error('Firebase Auth is not configured.');
-    }
     setLoading(true);
     try {
+      if (!isFirebaseConfigured || !auth) {
+        // Mock fallback login using local storage registered users
+        const mockUsersStr = localStorage.getItem('survey_mock_registered_users') || '[]';
+        const mockUsers = JSON.parse(mockUsersStr);
+        const found = mockUsers.find((u: any) => u.email === email && u.password === password);
+        if (!found) {
+          throw new Error('Invalid email or password.');
+        }
+        const { password: _, ...newProfile } = found;
+        localStorage.setItem('survey_demo_user', JSON.stringify(newProfile));
+        setUser({ uid: newProfile.uid, email: newProfile.email });
+        setProfile(newProfile);
+        setIsDemoMode(true);
+        return;
+      }
+      
+      if (isDemoMode) {
+        throw new Error('Please disable Demo Mode first to log in with actual Firebase Auth.');
+      }
       await signInWithEmailAndPassword(auth, email, password);
     } finally {
       setLoading(false);
@@ -102,13 +117,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(async () => {
     setLoading(true);
     try {
-      if (isDemoMode) {
+      if (isDemoMode || !isFirebaseConfigured) {
         localStorage.removeItem('survey_demo_user');
         setIsDemoMode(false);
         setUser(null);
         setProfile(null);
       } else if (auth) {
         await signOut(auth);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [isDemoMode]);
+
+  const register = useCallback(async (email: string, password: string, firstName: string, lastName: string, role: UserRole) => {
+    setLoading(true);
+    try {
+      if (!isFirebaseConfigured || !auth) {
+        // Mock fallback register in local storage
+        const mockUsersStr = localStorage.getItem('survey_mock_registered_users') || '[]';
+        const mockUsers = JSON.parse(mockUsersStr);
+        if (mockUsers.find((u: any) => u.email === email)) {
+          throw new Error('User already exists in mock database.');
+        }
+        const uid = `mock_user_${Date.now()}`;
+        const newProfile: UserProfile = {
+          uid,
+          email,
+          firstName,
+          lastName,
+          country: 'TH',
+          role
+        };
+        mockUsers.push({ ...newProfile, password });
+        localStorage.setItem('survey_mock_registered_users', JSON.stringify(mockUsers));
+
+        localStorage.setItem('survey_demo_user', JSON.stringify(newProfile));
+        setUser({ uid, email });
+        setProfile(newProfile);
+        setIsDemoMode(true);
+        return;
+      }
+
+      if (isDemoMode) {
+        throw new Error('Please disable Demo Mode first to register with actual Firebase Auth.');
+      }
+      
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+      
+      if (db) {
+        const docRef = doc(db, 'users', firebaseUser.uid);
+        const newProfile: UserProfile = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || email,
+          firstName,
+          lastName,
+          country: 'TH',
+          role
+        };
+        await setDoc(docRef, newProfile);
+        setProfile(newProfile);
       }
     } finally {
       setLoading(false);
@@ -149,10 +218,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAdmin,
     login,
     logout,
+    register,
     enableDemoMode,
     disableDemoMode,
     isDemoMode
-  }), [user, profile, loading, isAdmin, login, logout, enableDemoMode, disableDemoMode, isDemoMode]);
+  }), [user, profile, loading, isAdmin, login, logout, register, enableDemoMode, disableDemoMode, isDemoMode]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

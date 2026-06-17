@@ -40,6 +40,12 @@ export interface SurveyQuestion {
 export interface SurveyConfig {
   questions: SurveyQuestion[];
   textQuestions?: SurveyQuestion[];
+  logoEmoji?: string;
+  logoText?: string;
+  showLogo?: boolean;
+  headerTitle?: string;
+  showHeaderTitle?: boolean;
+  allowedLanguages?: string[];
   updatedAt: Date;
 }
 

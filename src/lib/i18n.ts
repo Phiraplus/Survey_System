@@ -63,7 +63,7 @@ const resources = {
           viewResults: 'View My Response',
           loginRequiredTitle: 'Authentication Required',
           loginRequiredDesc: 'Please log in to your account to complete the official evaluation.',
-          footerNotice: 'Official Retraining Conference Satisfaction Survey',
+          footerNotice: '',
           groups: {
             'Conference': 'Conference',
             'Guest Speakers': 'Guest Speakers',
@@ -134,7 +134,7 @@ const resources = {
           viewResults: 'ดูผลประเมินของฉัน',
           loginRequiredTitle: 'จำเป็นต้องลงทะเบียนเข้าใช้งาน',
           loginRequiredDesc: 'กรุณาเข้าสู่ระบบบัญชีของคุณเพื่อทำแบบประเมินความพึงพอใจนี้',
-          footerNotice: 'แบบสำรวจความพึงพอใจการจัดการประชุมสัมมนาอย่างเป็นทางการ',
+          footerNotice: '',
           groups: {
             'Conference': 'การประชุมสัมมนา',
             'Guest Speakers': 'วิทยากรรับเชิญ',
@@ -205,7 +205,7 @@ const resources = {
           viewResults: '查看我的回答',
           loginRequiredTitle: '需要身份验证',
           loginRequiredDesc: '请登录您的账户以完成官方评估。',
-          footerNotice: '官方重训会议满意度调查',
+          footerNotice: '',
           groups: {
             'Conference': '会议',
             'Guest Speakers': '特邀演讲嘉宾',
@@ -276,7 +276,7 @@ const resources = {
           viewResults: 'Ver mi respuesta',
           loginRequiredTitle: 'Autenticación requerida',
           loginRequiredDesc: 'Inicie sesión en su cuenta para completar la evaluación oficial.',
-          footerNotice: 'Encuesta Oficial de Satisfacción de la Conferencia de Reentrenamiento',
+          footerNotice: '',
           groups: {
             'Conference': 'Conferencia',
             'Guest Speakers': 'Oradores Invitados',
@@ -347,7 +347,7 @@ const resources = {
           viewResults: 'عرض إجابتي',
           loginRequiredTitle: 'مطلوب المصادقة',
           loginRequiredDesc: 'يرجى تسجيل الدخول إلى حسابك لإكمال التقييم الرسمي.',
-          footerNotice: 'الاستطلاع الرسمي لرضا المشاركين في المؤتمر',
+          footerNotice: '',
           groups: {
             'Conference': 'المؤتمر',
             'Guest Speakers': 'المتحدثون الضيوف',
@@ -418,7 +418,7 @@ const resources = {
           viewResults: 'Посмотреть мой ответ',
           loginRequiredTitle: 'Требуется авторизация',
           loginRequiredDesc: 'Пожалуйста, войдите в свой аккаунт для прохождения официальной оценки.',
-          footerNotice: 'Официальный опрос удовлетворенности участников конференции',
+          footerNotice: '',
           groups: {
             'Conference': 'Конференция',
             'Guest Speakers': 'Приглашенные спикеры',
@@ -489,7 +489,7 @@ const resources = {
           viewResults: 'Voir ma réponse',
           loginRequiredTitle: 'Authentification requise',
           loginRequiredDesc: 'Veuillez vous connecter à votre compte pour remplir l\'évaluation officielle.',
-          footerNotice: 'Enquête officielle de satisfaction de la conférence de recyclage',
+          footerNotice: '',
           groups: {
             'Conference': 'Conférence',
             'Guest Speakers': 'Conférenciers Invités',

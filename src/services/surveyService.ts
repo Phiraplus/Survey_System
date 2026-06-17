@@ -274,12 +274,24 @@ export const surveyService = {
         return {
           questions: parsed.questions || DEFAULT_QUESTIONS,
           textQuestions: parsed.textQuestions || DEFAULT_TEXT_QUESTIONS,
+          logoEmoji: parsed.logoEmoji !== undefined ? parsed.logoEmoji : '📝',
+          logoText: parsed.logoText !== undefined ? parsed.logoText : 'Survey System',
+          showLogo: parsed.showLogo !== undefined ? parsed.showLogo : true,
+          headerTitle: parsed.headerTitle !== undefined ? parsed.headerTitle : 'Satisfaction Evaluation',
+          showHeaderTitle: parsed.showHeaderTitle !== undefined ? parsed.showHeaderTitle : true,
+          allowedLanguages: parsed.allowedLanguages || ['en', 'zh', 'es', 'ar', 'ru', 'fr', 'th'],
           updatedAt: new Date(parsed.updatedAt)
         };
       }
       return {
         questions: DEFAULT_QUESTIONS,
         textQuestions: DEFAULT_TEXT_QUESTIONS,
+        logoEmoji: '📝',
+        logoText: 'Survey System',
+        showLogo: true,
+        headerTitle: 'Satisfaction Evaluation',
+        showHeaderTitle: true,
+        allowedLanguages: ['en', 'zh', 'es', 'ar', 'ru', 'fr', 'th'],
         updatedAt: new Date()
       };
     }
@@ -291,12 +303,24 @@ export const surveyService = {
         return {
           questions: data.questions || [],
           textQuestions: data.textQuestions || DEFAULT_TEXT_QUESTIONS,
+          logoEmoji: data.logoEmoji !== undefined ? data.logoEmoji : '📝',
+          logoText: data.logoText !== undefined ? data.logoText : 'Survey System',
+          showLogo: data.showLogo !== undefined ? data.showLogo : true,
+          headerTitle: data.headerTitle !== undefined ? data.headerTitle : 'Satisfaction Evaluation',
+          showHeaderTitle: data.showHeaderTitle !== undefined ? data.showHeaderTitle : true,
+          allowedLanguages: data.allowedLanguages || ['en', 'zh', 'es', 'ar', 'ru', 'fr', 'th'],
           updatedAt: data.updatedAt?.toDate?.() || new Date(data.updatedAt)
         } as SurveyConfig;
       }
       return {
         questions: DEFAULT_QUESTIONS,
         textQuestions: DEFAULT_TEXT_QUESTIONS,
+        logoEmoji: '📝',
+        logoText: 'Survey System',
+        showLogo: true,
+        headerTitle: 'Satisfaction Evaluation',
+        showHeaderTitle: true,
+        allowedLanguages: ['en', 'zh', 'es', 'ar', 'ru', 'fr', 'th'],
         updatedAt: new Date()
       };
     } catch (e) {
@@ -320,6 +344,7 @@ export const surveyService = {
       updatedAt: new Date()
     });
   },
+
 
   /**
    * Fetch survey response for a specific user
