@@ -1,131 +1,197 @@
-# Standalone Satisfaction Survey System
+# 📝 คู่มือการติดตั้งและใช้งานระบบแบบประเมินความพึงพอใจ (Satisfaction Survey System)
 
-A self-contained, high-performance, and beautifully polished **Satisfaction Survey & Feedback Management System** extracted from the FBINAA Asia Pacific Conference codebase. Built using **React**, **Vite**, **TypeScript**, and **Firebase** (Firestore & Auth), with qualitative feedback summaries powered by **Gemini AI**.
+ระบบประเมินความพึงพอใจและระบบจัดการหลังบ้านระดับพรีเมียม (Satisfaction Survey & Feedback Management System) พัฒนาด้วย **React**, **Vite**, **TypeScript** และเชื่อมต่อระบบฐานข้อมูลคลาวด์ด้วย **Firebase** (Firestore & Auth) พร้อมระบบวิเคราะห์ความเห็นผู้ใช้งานด้วย **Gemini AI**
 
-This project contains everything needed to run both the frontend survey questionnaire and the administrative configuration/reporting dashboard.
-
----
-
-## 🌟 Key Features
-
-*   **Premium Interactive Form**: Smooth animations, dynamic progress bars, and custom star rating sliders.
-*   **Multilingual Support**: Realtime i18n support supporting multiple languages (defaulting to English and Thai).
-*   **Survey Configuration Manager**: Drag-and-drop questions to reorder, add custom questions, or edit translations.
-*   **Satisfaction Reports Dashboard**: Global score index charts, performance metric bars, and a delegate response explorer.
-*   **Export to CSV**: Download complete survey results in raw CSV format with one click.
-*   **Gemini AI Feedback Summary**: Summarize long attendee feedback qualitative text, highlight strengths/weaknesses, and generate actionable recommendations using AI.
-*   **Dual Storage Engine (Firestore & LocalStorage)**: Works immediately out-of-the-box in mock mode without setting up Firebase, automatically persisting data in `localStorage`.
+คู่มือฉบับนี้เขียนขึ้นแบบ **จับมือทำ (Step-by-Step)** ตั้งแต่ขั้นตอนการดาวน์โหลดโค้ด ติดตั้ง รันระบบทดสอบออฟไลน์ เชื่อมต่อคลาวด์ ไปจนถึงการอัปโหลดขึ้นโฮสติ้งจริง (Hosting Deployment)
 
 ---
 
-## 📁 Directory Structure
-
-```
+## 📁 โครงสร้างของโปรเจกต์ (Project Structure)
+```text
 survey-standalone/
-├── package.json              # App dependencies (Vite 8, React 19, Firebase client)
-├── tsconfig.json             # TypeScript compiler settings
-├── vite.config.ts            # Vite bundler config
-├── index.html                # Main html entry
-├── firestore.rules           # Secure rules for config/survey documents
-├── firebase.json             # Firebase project configuration mapping rules
-├── seed-survey.js            # Node script using Firebase Admin to seed questions
-├── README.md                 # Setup & running guidelines
+├── package.json              # ไฟล์จัดการ Dependency และ Script (Vite 8, React 19, Firebase)
+├── tsconfig.json             # การตั้งค่า TypeScript Compiler
+├── vite.config.ts            # การตั้งค่า Vite Bundler
+├── index.html                # ไฟล์ทางเข้าหลัก HTML
+├── firestore.rules           # กฎความปลอดภัย (Security Rules) ของ Firestore
+├── firebase.json             # การตั้งค่าพอร์ตและสิทธิ์ในการเชื่อม Hosting/Firestore
+├── seed-survey.js            # สคริปต์ Node สำหรับยัดข้อมูลคำถามตั้งต้นเข้า Firebase
+├── README.md                 # คู่มือติดตั้งและใช้งานระบบฉบับนี้
 └── src/
-    ├── main.tsx              # React app mount bootstrap
-    ├── App.tsx               # Header, view layout, language selector
-    ├── App.css               # Navigation bar & layout styling
-    ├── index.css             # Main design tokens and colors
+    ├── main.tsx              # ไฟล์เริ่มต้นระบบเมานต์คอมโพเนนต์ React
+    ├── App.tsx               # หน้าโฮมเพจหลัก การกรองภาษา การจัดการหน้า/เส้นทาง
+    ├── App.css               # สไตล์ลิ่งแถบเมนูนำทางและ Layout
+    ├── index.css             # ระบบดีไซน์โทนสี ตัวอักษร และหน้าตาระบบ (Design Tokens)
     ├── types/
-    │   └── index.ts          # Type safety declarations
+    │   └── index.ts          # ไฟล์เก็บอินเทอร์เฟซและสคริปต์ความปลอดภัย Type
     ├── contexts/
-    │   ├── AuthContext.tsx   # Tracks user authentication & handles mock mode
-    │   └── ToastContext.tsx  # Dynamic floating alerts
+    │   ├── AuthContext.tsx   # จัดการล็อกอิน/ลงทะเบียน ทั้ง Firebase จริง และจำลองผ่าน LocalStorage
+    │   ├── ToastContext.tsx  # ระบบแจ้งเตือนกล่องแบนเนอร์ลอยบนหน้าจอ (Toast Alerts)
+    │   └── ConfigContext.tsx # ดึงข้อมูลโลโก้ หัวข้อข้อความ และภาษาที่อนุญาตให้ใช้งานแบบเรียลไทม์
     ├── lib/
-    │   ├── firebase.ts       # Initializes Firebase Web Client
-    │   ├── sanitizer.ts      # Strip HTML script tags to avoid XSS injections
-    │   └── i18n.ts           # Bundles default translations
+    │   ├── firebase.ts       # ไฟล์เริ่มต้นการเชื่อมต่อไคลเอนต์ Firebase
+    │   ├── sanitizer.ts      # ระบบป้องกันสคริปต์อันตราย XSS (Cross-Site Scripting)
+    │   └── i18n.ts           # จัดเตรียมคีย์แปลภาษาเริ่มต้น (อังกฤษ, ไทย, จีน, สเปน, ฝรั่งเศส, รัสเซีย, อาหรับ)
     ├── services/
-    │   ├── surveyService.ts  # Fetches config & logs survey submissions
-    │   └── geminiService.ts  # Runs qualitative analytics using Gemini API
-    └── features/             # Component directories
-        ├── General/          # Attendee survey questionnaire form
-        └── admin/            # Administrator configuration & metrics
+    │   ├── surveyService.ts  # จัดการ CRUD แบบสอบถามและประวัติการส่งฟอร์ม
+    │   └── geminiService.ts  # ระบบส่งข้อความวิเคราะห์หาจุดเด่นจุดด้อยผ่าน Gemini AI
+    └── features/
+        ├── General/          # โฟลเดอร์หน้าแบบประเมินความพึงพอใจสำหรับผู้เข้างานทั่วไป
+        └── admin/            # โฟลเดอร์ระบบแผงควบคุมแอดมิน การตั้งค่าระบบ และการดูรายงานผล
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🛠️ ขั้นตอนที่ 1: การติดตั้งและรันในโหมดจำลองออฟไลน์ (Demo Mode)
+ระบบถูกออกแบบมาให้สามารถ **ทำงานได้ทันทีหลังโคลนโค้ด** แม้จะยังไม่ได้สร้างฐานข้อมูล Firebase โดยระบบจะบันทึกข้อมูลจำลองทุกอย่างลงใน `localStorage` ของเบราว์เซอร์อัตโนมัติ
 
-### 1. Installation
-Install the project dependencies:
+### 1.1 โคลนโปรเจกต์ (Git Clone)
+เปิด Command Prompt / Terminal แล้วพิมพ์คำสั่งดังนี้เพื่อคัดลอกโปรเจกต์ลงเครื่องคอมพิวเตอร์ของคุณ:
+```cmd
+git clone <URL_ของ_REPOSITORY>
+cd Survey_System
+```
+
+### 1.2 ติดตั้งไลบรารีระบบ (npm install)
+พิมพ์คำสั่งดาวน์โหลดโมดูลและไลบรารีต่าง ๆ ที่จำเป็น:
 ```cmd
 npm install
 ```
 
-### 2. Run Locally in Demo Mode (No Setup Required)
-You can run and test the survey immediately. The application includes a top **Demo Controls** bar that lets you toggle mock profiles:
+### 1.3 สั่งรันระบบเพื่อทดสอบโลคอล (Run locally)
+พิมพ์คำสั่งเริ่มเซิร์ฟเวอร์จำลองการพัฒนา:
 ```cmd
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-*   Click **Mock: Attendee Form** to fill out the questionnaire.
-*   Click **Mock: Admin Panel** to enter the reporting metrics, export CSV reports, customize questions, or run the AI feedback summarization.
+หลังจากรันเสร็จสิ้น ให้เปิดเบราว์เซอร์แล้วเข้าไปที่ [http://localhost:3000](http://localhost:3000)
+
+*   **แถบควบคุมเดโม (Demo Bar):** คุณจะเห็นแถบด้านบนสุดแสดงสถานะจำลอง (จะมีเฉพาะในโหมดพัฒนาระหว่างที่ยังไม่ได้ต่อฐานข้อมูลจริง)
+    *   คลิก **Mock: Attendee Form** เพื่อทดลองกรอกฟอร์มในสถานะผู้ใช้งานทั่วไป
+    *   คลิก **Mock: Admin Panel** เพื่อทดลองเข้าหน้าแผงควบคุมระบบตรวจสอบสถิติ กราฟฟิก และเมนูแก้ไขคำถามโดยไม่ต้องป้อนรหัสผ่าน
 
 ---
 
-## 🛡️ Configuring Live Firebase Services
+## 🛡️ ขั้นตอนที่ 2: การตั้งค่าเชื่อมต่อ Firebase (Live Production Mode)
+หากพร้อมที่จะเปลี่ยนระบบไปใช้ฐานข้อมูลคลาวด์บนอินเทอร์เน็ต ให้ทำตามขั้นตอนการต่อฐานข้อมูลจริงดังนี้:
 
-To transition the application from Demo Mode to a live cloud database:
+### 2.1 สร้างโปรเจกต์บน Firebase Console
+1.  เข้าไปที่ [Firebase Console](https://console.firebase.google.com/) แล้วเข้าสู่ระบบด้วยบัญชี Google
+2.  คลิก **Add Project (เพิ่มโปรเจกต์)** ตั้งชื่อโปรเจกต์ของคุณ (เช่น `my-survey-app`) และกดตกลงสร้างโปรเจกต์
+3.  **เปิดใช้งาน Cloud Firestore:**
+    *   คลิกเมนู **Firestore Database** ที่แถบเมนูด้านซ้าย
+    *   คลิกปุ่ม **Create Database**
+    *   เลือกโหมดเริ่มต้นแบบ **Start in production mode** -> เลือกที่ตั้งเครื่องเซิร์ฟเวอร์ (เช่น `asia-southeast1` ในสิงคโปร์) -> กดตกลงเปิดใช้งาน
+4.  **เปิดใช้งาน Authentication:**
+    *   คลิกเมนู **Authentication** ที่แถบเมนูด้านซ้าย
+    *   คลิกปุ่ม **Get Started**
+    *   เลือกแท็บ **Sign-in method** -> เลือกหัวข้อ **Email/Password (อีเมล/รหัสผ่าน)** -> ติ๊กถูกที่ช่อง **Enable** และกด **Save**
 
-### 1. Create a Firebase Project
-1.  Go to the [Firebase Console](https://console.firebase.google.com/) and click **Add Project**.
-2.  Enable **Cloud Firestore** database. Choose **Start in production mode** and pick your location.
-3.  Enable **Authentication**. Under **Sign-in method**, enable **Email/Password**.
-
-### 2. Configure Environment Variables
-1.  Register a **Web App** in your Firebase project.
-2.  Copy your Web App Config credentials.
-3.  Create a file named `.env` in the root of the `survey-standalone` folder (using `.env.example` as a template) and add your keys:
+### 2.2 เชื่อมต่อแอปพลิเคชันของคุณ
+1.  ในหน้าแรกของโปรเจกต์ Firebase ให้คลิกปุ่มสัญลักษณ์รูปโค้ดวงเล็บ `< />` (Web App) เพื่อลงทะเบียนแอป
+2.  ตั้งชื่อแอปของคุณ (เช่น `Survey Web App`) จากนั้นกดตกลง
+3.  หน้าจอจะแสดงโครงสร้างออบเจกต์การตั้งค่า (Firebase SDK Config) ดังนี้:
+    ```javascript
+    const firebaseConfig = {
+      apiKey: "AIzaSy...",
+      authDomain: "my-survey-app.firebaseapp.com",
+      projectId: "my-survey-app",
+      storageBucket: "my-survey-app.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:12345:web:abcd"
+    };
+    ```
+4.  ที่คอมพิวเตอร์ของคุณ ให้สร้างไฟล์ชื่อ **`.env`** ไว้ที่โฟลเดอร์นอกสุดของแอป (ระดับเดียวกับไฟล์ `package.json`)
+5.  คัดลอกค่าจาก Firebase Config มาใส่ในไฟล์ `.env` ดังรูปแบบด้านล่าง (สามารถแก้ไขจากไฟล์ตัวอย่าง `.env.example` ได้):
     ```env
-    VITE_FIREBASE_API_KEY=your-api-key
-    VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
-    VITE_FIREBASE_PROJECT_ID=your-project-id
-    VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
-    VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-    VITE_FIREBASE_APP_ID=your-app-id
+    VITE_FIREBASE_API_KEY=AIzaSy...
+    VITE_FIREBASE_AUTH_DOMAIN=my-survey-app.firebaseapp.com
+    VITE_FIREBASE_PROJECT_ID=my-survey-app
+    VITE_FIREBASE_STORAGE_BUCKET=my-survey-app.appspot.com
+    VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+    VITE_FIREBASE_APP_ID=1:12345:web:abcd
+    VITE_USE_EMULATORS=false
     ```
 
-### 3. Deploy Security Rules
-Use the [Firebase CLI](https://firebase.google.com/docs/cli) to deploy the database rules:
-```cmd
-npm install -g firebase-tools
-firebase login
-firebase use your-project-id
-firebase deploy --only firestore
-```
-*(Alternatively, copy the contents of `firestore.rules` and paste them directly into the **Rules** tab of Cloud Firestore in the Firebase Console).*
+### 2.3 ติดตั้งกฎความปลอดภัย Firestore (Firestore Security Rules)
+เพื่อความปลอดภัย ข้อมูลแบบสอบถามและบัญชีผู้ใช้ต้องผ่านสิทธิ์ผู้ดูแลระบบตามที่เราเขียนไว้ใน `firestore.rules`:
+1.  เปิดหน้าเว็บ Firebase Console ไปที่เมนู **Firestore Database** -> คลิกแท็บ **Rules (กฎ)**
+2.  คัดลอกเนื้อหาทั้งหมดในไฟล์ `firestore.rules` ภายในโฟลเดอร์โปรเจกต์ของคุณ ไปวางทับกฎเดิมใน Firebase Console
+3.  คลิกปุ่ม **Publish (เผยแพร่)** เพื่อเปิดใช้งานกฎ
 
-### 4. Seed Default Questions (Firestore Admin SDK)
-The system stores customizable survey questions in Firestore. To seed the default set:
-1.  Go to **Firebase Console -> Project Settings -> Service Accounts**.
-2.  Click **Generate new private key** to download the credentials JSON file.
-3.  Place the downloaded JSON file in the root of the `survey-standalone` folder and rename it to **`service-account.json`**.
-4.  Run the database seeding script:
+---
+
+## ⚡ ขั้นตอนที่ 3: การใส่คำถามตั้งต้นเข้า Firestore (Database Seeding)
+หน้าจอดึงฟอร์มแบบสอบถามมาจากคอลเลกชัน `config` ใน Firestore ดังนั้นเราจำเป็นต้องเขียนข้อมูลตั้งต้นเข้าไปครั้งแรก:
+
+1.  เปิดเว็บ Firebase Console -> คลิกไอคอนฟันเฟือง **Project Settings** ที่มุมซ้ายบน -> ไปที่แท็บ **Service Accounts (บัญชีบริการ)**
+2.  เลือกหัวข้อ **Firebase Admin SDK** -> กดปุ่ม **Generate new private key (สร้างคีย์ส่วนตัวใหม่)**
+3.  ไฟล์จะดาวน์โหลดลงในเครื่องคอมพิวเตอร์ของคุณในรูปแบบไฟล์ `.json`
+4.  ย้ายไฟล์ที่ดาวน์โหลดมามาใส่ไว้ที่โฟลเดอร์ระดับนอกสุดของโปรเจกต์นี้ และตั้งชื่อใหม่เป็น **`service-account.json`**
+5.  ใน Terminal ให้พิมพ์คำสั่งเพื่อส่งข้อมูลชุดคำถามเริ่มต้นขึ้นฐานข้อมูล Firestore:
     ```cmd
     npm run seed
     ```
-5.  *(Optional)* Once completed, you can safely delete the `service-account.json` key to prevent accidental leakage.
-
-### 5. Gemini AI Qualitative summaries
-To enable the **Summarize with AI** feature:
-1.  Deploy the official Firebase extension **"Multimodal Tasks with Gemini API"** (specifically named `ext-firestore-genai-generate`).
-2.  Alternatively, update `src/services/geminiService.ts` to call a direct serverless function/backend connecting to your preferred LLM provider.
+6.  เมื่อขึ้นข้อความยืนยันความสำเร็จ ข้อมูลชุดคำถามและโครงสร้างทั้งหมดจะพร้อมใช้งานใน Firestore คลาวด์เรียบร้อยแล้ว
+7.  ⚠️ **ข้อควรระวังเพื่อความปลอดภัย:** คุณสามารถลบไฟล์ `service-account.json` ทิ้งได้ทันทีเพื่อป้องกันการรั่วไหลของข้อมูลความลับโปรเจกต์ของคุณ
 
 ---
 
-## 📝 Available Scripts
+## 🚀 ขั้นตอนที่ 4: การเข้าใช้งานระบบและปรับแต่งหน้าตา (Admin Portal)
+หลังจากรันแอปสำเร็จแล้ว ระบบหลังบ้านจะไม่แสดงผลปุ่มล็อกอินใด ๆ บนหน้าแรกเพื่อซ่อนสิทธิ์จากผู้ใช้ทั่วไป
 
-*   `npm run dev`: Starts the local development server at port 3000.
-*   `npm run build`: Compiles TypeScript and packages the Vite production build.
-*   `npm run preview`: Launches a local server to preview the built production bundle.
-*   `npm run seed`: Executes the database seeding CLI using the Admin key.
+### 4.1 ทางเข้าสู่ระบบแอดมิน (Hidden Admin Route)
+*   ให้พิมพ์ที่แถบที่อยู่เว็บเบราว์เซอร์ไปที่: **`http://localhost:3000/admin`** (หรือต่อท้ายโดเมนด้วย `#/admin` หรือ `/admin` บนคลาวด์)
+*   คุณจะพบกับหน้าจอล็อกอินและลงทะเบียนระดับพรีเมียม (Admin Auth Screen) แบบเบลอหลัง (Glassmorphism)
+*   **การสมัครบัญชีแอดมินครั้งแรก:** 
+    *   คลิก **Create Account**
+    *   กรอก ชื่อ-นามสกุล, อีเมล, รหัสผ่าน (ขั้นต่ำ 6 ตัวอักษร) แล้วกด **Register**
+    *   ระบบจะทำการลงทะเบียนข้อมูลบัญชีของคุณขึ้นฐานข้อมูล Firebase Auth พร้อมสร้างเอกสารโปรไฟล์สิทธิ์ดูแลระบบ (`role: 'admin'`) ในตาราง `users` ของ Firestore ทันที
+
+### 4.2 การปรับแต่งโลโก้ หัวข้อ และภาษาที่แผงควบคุมแอดมิน
+เมื่อเข้าสู่ระบบสำเร็จ จะปรากฏแดชบอร์ดจัดการ ให้เลือกแท็บ **Configuration (การตั้งค่าแบบประเมิน)** ด้านบน แล้วเลือกเมนูย่อย **⚙️ System Settings (ตั้งค่าระบบ)** ซึ่งคุณสามารถแก้ไขข้อมูลดังต่อไปนี้ได้แบบเรียลไทม์:
+1.  **การปรับโลโก้ (Logo Customization):**
+    *   สามารถเปิด-ปิดการแสดงผลโลโก้ได้ผ่านช่องติ๊กถูก
+    *   แก้ไขสัญลักษณ์ Emoji หน้าร้านได้ตามใจชอบ (เช่น 📝, 🎯, 🚔, 👮)
+    *   เปลี่ยนชื่อแบรนด์หรือข้อความโลโก้หลักของระบบ
+2.  **การปรับหัวเรื่องหลัก (Headline Customization):**
+    *   สามารถติ๊กเปิด-ปิดการแสดงผลหัวเรื่องเสริมที่อยู่ถัดจากโลโก้ได้
+    *   เปลี่ยนหัวเรื่องหลักหน้าเว็บได้ตามใจต้องการ (เช่น "Satisfaction Evaluation" หรือ "แบบสำรวจบริการ")
+3.  **การจำกัดภาษา (Allowed Languages):**
+    *   ระบบนี้รองรับ multilingual ทั้งหมด 7 ภาษา (อังกฤษ, ไทย, จีน, สเปน, อาหรับ, รัสเซีย, ฝรั่งเศส)
+    *   คุณสามารถติ๊กถูกหน้าภาษาที่ตกลงยอมรับให้แสดงผลให้ผู้ใช้สลับภาษาในแถบสลัวด้านบนได้
+    *   *หมายเหตุ:* หากคุณเลือกติ๊กถูกไว้เพียงภาษาเดียว ตัวเลือกรหัสเปลี่ยนภาษาในหน้าฟรอนต์เอนด์จะซ่อนตัวไปโดยอัตโนมัติเพื่อให้หน้าจอดูเรียบเนียนที่สุด
+4.  เมื่อกรอกข้อมูลเรียบร้อย กดปุ่ม **Save Settings** ด้านล่างสุด ตัวแปรจะถูกจัดเก็บลงสู่ Firestore และนำไปเปลี่ยนภาพลักษณ์หน้าหลักทันทีโดยไม่ต้องทำการรีเฟรชหน้าจอ (Realtime Config Updates)
+
+---
+
+## 📦 ขั้นตอนที่ 5: การอัปโหลดหน้าเว็บขึ้นโฮสต์จริง (Hosting Deployment)
+เมื่อคุณต้องการเปิดระบบให้ประชาชนทั่วไปเข้ามาใช้งานผ่านอินเทอร์เน็ต ให้ทำตามขั้นตอนการเอาขึ้นโฮสต์จริงดังนี้:
+
+### 5.1 ตรวจสอบความถูกต้องของ Firebase CLI
+1.  หากเครื่องคุณยังไม่มีตัวควบคุมคำสั่ง Firebase ให้ทำการติดตั้งทั่วเครื่องโดยรัน:
+    ```cmd
+    npm install -g firebase-tools
+    ```
+2.  สั่งล็อกอินเข้าสู่บัญชี Firebase ของคุณผ่าน Terminal:
+    ```cmd
+    firebase login
+    ```
+3.  สั่งระบุให้ใช้โปรเจกต์ที่มีอยู่แล้วในระบบ Firebase ของคุณ:
+    ```cmd
+    firebase use --add
+    ```
+    (เลือกโปรเจกต์ย่อยที่เราเชื่อมในข้อ 2.1)
+
+### 5.2 การสร้างไฟล์แพ็กเกจเว็บไซต์ (Production Build)
+รันคำสั่งบิวด์และรวบรวมไฟล์ส่วนหน้าให้ออกมาเป็น HTML/JS ที่พร้อมโหลดได้เร็วที่สุด:
+```cmd
+npm run build
+```
+เมื่อสร้างเสร็จ ระบบจะนำไฟล์ทั้งหมดที่ผ่านการคอมไพล์ไปใส่ไว้ที่โฟลเดอร์ **`dist`**
+
+### 5.3 อัปโหลดขึ้นโฮสติ้ง Firebase (Deploy to Hosting)
+พิมพ์คำสั่งนี้เพื่อเปิดตัวส่งเว็บไซต์ขึ้นเซิร์ฟเวอร์โฮสติ้งของกูเกิลคลาวด์:
+```cmd
+firebase deploy --only hosting
+```
+เมื่อส่งข้อมูลเสร็จเรียบร้อย จะปรากฏข้อความยืนยันสถานะความสำเร็จพร้อมบอกลิงก์ URL ปลายทาง (เช่น `https://my-survey-app.web.app`) ซึ่งคนภายนอกทุกคนสามารถเข้าไปทำแบบสอบถามได้ทันที!

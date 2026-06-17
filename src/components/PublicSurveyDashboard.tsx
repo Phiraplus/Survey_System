@@ -6,7 +6,7 @@ import { SatisfactionSurvey } from '../features/General/SatisfactionSurvey';
  * PublicSurveyDashboard acts as the primary wrapper for the public survey form.
  */
 export function PublicSurveyDashboard() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
 
   // Force language switch if needed or allow toggle
   useEffect(() => {
