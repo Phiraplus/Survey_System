@@ -466,7 +466,7 @@ export class FirestoreAdapter implements DatabaseAdapter, AuthAdapter {
     return onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const docSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
+          const docSnap = await getDoc(doc(db!, 'users', firebaseUser.uid));
           let role: 'admin' | 'attendee' | 'superadmin' = 'attendee';
           let firstName = 'Attendee';
           let lastName = 'Delegate';
