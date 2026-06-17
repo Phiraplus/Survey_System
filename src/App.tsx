@@ -6,7 +6,6 @@ import { PublicSurveyDashboard } from './components/PublicSurveyDashboard';
 import { SurveyCenter } from './features/admin/SurveyCenter';
 import { AdminAuth } from './features/admin/AdminAuth';
 import { supportedLanguages, languageNames } from './lib/i18n';
-import { isFirebaseConfigured } from './lib/firebase';
 import './App.css';
 
 function App() {
@@ -60,8 +59,8 @@ function App() {
     setLangDropdownOpen(false);
   };
 
-  // Only show demo controls bar in Dev environment when Firebase is not configured
-  const showDemoBar = import.meta.env.DEV && !isFirebaseConfigured;
+  // Only show demo controls bar in Dev environment when running with LocalStorage mode
+  const showDemoBar = import.meta.env.DEV && (import.meta.env.VITE_DATABASE_TYPE || 'local') === 'local';
 
   return (
     <div className="app-layout">
@@ -81,7 +80,7 @@ function App() {
               style={{ backgroundColor: '#dc2626' }} 
               onClick={disableDemoMode}
             >
-              Reset (Use Firebase)
+              Reset Session
             </button>
           )}
         </div>
