@@ -264,7 +264,13 @@ async function seed() {
       updatedAt: new Date()
     });
     
-    console.log('✅ Default survey questions successfully seeded in Firestore database!');
+    const passcodeDocRef = db.collection('config').doc('admin_passcode');
+    console.log('⏳ Uploading default admin registration passcode...');
+    await passcodeDocRef.set({
+      passcode: 'SurveyAdmin2026'
+    });
+    
+    console.log('✅ Default survey questions and admin passcode successfully seeded!');
   } catch (error) {
     console.error('❌ Failed to seed survey questions:', error.message);
     console.log('\n💡 Troubleshooting:');

@@ -18,7 +18,7 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, password: string, firstName: string, lastName: string, role: UserRole) => Promise<void>;
+  register: (email: string, password: string, firstName: string, lastName: string, role: UserRole, adminPasscode?: string) => Promise<void>;
   enableDemoMode: (role: UserRole) => void;
   disableDemoMode: () => void;
   isDemoMode: boolean;
@@ -130,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isDemoMode]);
 
-  const register = useCallback(async (email: string, password: string, firstName: string, lastName: string, role: UserRole) => {
+  const register = useCallback(async (email: string, password: string, firstName: string, lastName: string, role: UserRole, adminPasscode?: string) => {
     setLoading(true);
     try {
       if (!isFirebaseConfigured || !auth) {
@@ -140,6 +140,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (mockUsers.find((u: any) => u.email === email)) {
           throw new Error('User already exists in mock database.');
         }
+
+        // In mock mode, check if the admin passcode matches the default one
+        if (role === 'admin' && adminPasscode !== 'SurveyAdmin2026') {
+          throw new Error('Invalid Admin Registration Passcode.');
+        }
+
         const uid = `mock_user_${Date.now()}`;
         const newProfile: UserProfile = {
           uid,
@@ -168,16 +174,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (db) {
         const docRef = doc(db, 'users', firebaseUser.uid);
-        const newProfile: UserProfile = {
+        const newProfile: UserProfile & { adminPasscode?: string } = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || email,
           firstName,
           lastName,
           country: 'TH',
-          role
+          role,
+          adminPasscode
         };
         await setDoc(docRef, newProfile);
-        setProfile(newProfile);
+        
+        // Clean up passcode from local React state
+        const { adminPasscode: _, ...profileForState } = newProfile;
+        setProfile(profileForState);
       }
     } finally {
       setLoading(false);

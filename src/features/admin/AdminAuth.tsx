@@ -15,6 +15,7 @@ export function AdminAuth() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [adminPasscode, setAdminPasscode] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +27,10 @@ export function AdminAuth() {
     if (isRegisterMode) {
       if (!firstName || !lastName) {
         addToast({ type: 'error', title: 'Validation Error', message: 'Please enter your first and last name.' });
+        return;
+      }
+      if (!adminPasscode) {
+        addToast({ type: 'error', title: 'Validation Error', message: 'Please enter the Admin Registration Passcode.' });
         return;
       }
       if (password !== confirmPassword) {
@@ -42,7 +47,7 @@ export function AdminAuth() {
     setLoading(true);
     try {
       if (isRegisterMode) {
-        await register(email, password, firstName, lastName, 'admin');
+        await register(email, password, firstName, lastName, 'admin', adminPasscode);
         addToast({ type: 'success', title: 'Success', message: 'Admin account created successfully!' });
       } else {
         await login(email, password);
@@ -197,6 +202,21 @@ export function AdminAuth() {
             </div>
           )}
 
+          {isRegisterMode && (
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Admin Registration Passcode</label>
+              <input
+                type="password"
+                className="form-input"
+                value={adminPasscode}
+                onChange={e => setAdminPasscode(e.target.value)}
+                placeholder="Enter system passcode to register"
+                required
+                style={{ height: '42px', fontSize: '13px' }}
+              />
+            </div>
+          )}
+
           <button
             type="submit"
             className="btn btn-primary"
@@ -239,6 +259,7 @@ export function AdminAuth() {
                   setIsRegisterMode(false);
                   setPassword('');
                   setConfirmPassword('');
+                  setAdminPasscode('');
                 }}
                 style={{ 
                   background: 'none', 
@@ -260,6 +281,7 @@ export function AdminAuth() {
                 onClick={() => {
                   setIsRegisterMode(true);
                   setPassword('');
+                  setAdminPasscode('');
                 }}
                 style={{ 
                   background: 'none', 
