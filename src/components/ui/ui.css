@@ -648,6 +648,21 @@
 }
 
 /* Admin Center Media Queries */
+@media (max-width: 768px) {
+  .admin-tab-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: var(--space-4);
+  }
+  .admin-tab-btn {
+    width: 100%;
+    text-align: center;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+  }
+}
+
 @media (max-width: 640px) {
   .results-metrics-grid {
     grid-template-columns: 1fr;
@@ -663,16 +678,6 @@
   .admin-auth-grid {
     grid-template-columns: 1fr;
     gap: var(--space-2);
-  }
-  
-  .admin-tab-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-  .admin-tab-btn {
-    width: 100%;
-    text-align: center;
   }
   
   .modal-form-grid {
