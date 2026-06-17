@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.users (
     first_name text,
     last_name text,
     role text DEFAULT 'attendee'::text,
+    admin_passcode text DEFAULT NULL,
     created_at timestamp with time zone DEFAULT timezone('utc'::text, now())
 );
 
@@ -104,7 +105,77 @@ CREATE POLICY "Allow admin full access to surveys" ON public.surveys
         )
     );
 
--- 4. Seed Default Data (Admin Passcode & Survey Questions)
+-- 4. Database triggers for role validation (Prevents Privilege Escalation)
+CREATE OR REPLACE FUNCTION public.check_user_registration()
+RETURNS TRIGGER AS $$
+DECLARE
+    db_passcode text;
+BEGIN
+    -- Force role to attendee by default if not specified
+    IF NEW.role IS NULL THEN
+        NEW.role := 'attendee';
+    END IF;
+
+    -- If attempting to register as admin or superadmin
+    IF NEW.role = 'admin' OR NEW.role = 'superadmin' THEN
+        -- Get the current admin passcode from system_config
+        SELECT value->>'passcode' INTO db_passcode 
+        FROM public.system_config 
+        WHERE key = 'admin_passcode';
+
+        -- Fallback to default if not seeded yet
+        IF db_passcode IS NULL THEN
+            db_passcode := 'SurveyAdmin2026';
+        END IF;
+
+        -- Verify passcode
+        IF NEW.admin_passcode IS NULL OR NEW.admin_passcode <> db_passcode THEN
+            RAISE EXCEPTION 'Invalid Admin Registration Passcode.';
+        END IF;
+    END IF;
+
+    -- Clear the transient passcode so it is never saved to the table
+    NEW.admin_passcode := NULL;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.check_user_update()
+RETURNS TRIGGER AS $$
+DECLARE
+    is_requester_admin boolean;
+BEGIN
+    -- Check if role is being changed to admin or superadmin
+    IF NEW.role <> OLD.role AND (NEW.role = 'admin' OR NEW.role = 'superadmin') THEN
+        -- Only existing admins can promote someone to admin
+        SELECT EXISTS (
+            SELECT 1 FROM public.users
+            WHERE uid = auth.uid() AND (role = 'admin' OR role = 'superadmin')
+        ) INTO is_requester_admin;
+
+        IF NOT is_requester_admin THEN
+            RAISE EXCEPTION 'Access Denied: Cannot modify roles without administrator privileges.';
+        END IF;
+    END IF;
+    
+    -- Clear the transient passcode
+    NEW.admin_passcode := NULL;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Bind the triggers to public.users
+CREATE TRIGGER tr_check_user_registration
+    BEFORE INSERT ON public.users
+    FOR EACH ROW
+    EXECUTE FUNCTION public.check_user_registration();
+
+CREATE TRIGGER tr_check_user_update
+    BEFORE UPDATE ON public.users
+    FOR EACH ROW
+    EXECUTE FUNCTION public.check_user_update();
+
+-- 5. Seed Default Data (Admin Passcode & Survey Questions)
 INSERT INTO public.system_config (key, value)
 VALUES (
     'admin_passcode',

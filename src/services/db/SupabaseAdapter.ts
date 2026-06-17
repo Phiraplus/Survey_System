@@ -476,6 +476,7 @@ export class SupabaseAdapter implements DatabaseAdapter, AuthAdapter {
         first_name: firstName,
         last_name: lastName,
         role,
+        admin_passcode: passcode, // Checked by trigger, never saved
         created_at: new Date().toISOString()
       });
     if (profileError) {
