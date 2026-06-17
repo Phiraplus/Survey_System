@@ -1,0 +1,30 @@
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { SatisfactionSurvey } from '../features/General/SatisfactionSurvey';
+
+/**
+ * PublicSurveyDashboard acts as the primary wrapper for the public survey form.
+ */
+export function PublicSurveyDashboard() {
+  const { t, i18n } = useTranslation();
+
+  // Force language switch if needed or allow toggle
+  useEffect(() => {
+    // Default to browser locale detection (i18n handles this), 
+    // but force English fallback if language is unsupported.
+  }, [i18n]);
+
+  return (
+    <div className="container animate-fade-in" style={{ padding: 'var(--space-8) var(--space-4)', maxWidth: '900px' }}>
+      <div style={{ background: 'transparent' }}>
+        <SatisfactionSurvey isPublic={true} />
+      </div>
+
+      <div style={{ marginTop: 'var(--space-12)', textAlign: 'center', opacity: 0.5 }}>
+        <p style={{ fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 600 }}>
+          {t('custom.survey.footerNotice', 'Official Retraining Conference Satisfaction Survey')}
+        </p>
+      </div>
+    </div>
+  );
+}
